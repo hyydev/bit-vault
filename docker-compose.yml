@@ -1,41 +1,42 @@
 services:
-
   mongodb:
     image: mongo:8
     container_name: bitvault-mongodb
-
     ports:
       - "27017:27017"
-
     environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: admin123
-
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
     volumes:
       - ./mongo-data:/data/db
-
     restart: unless-stopped
-
 
   mongo-express:
     image: mongo-express
     container_name: bitvault-mongo-express
-
     ports:
       - "8081:8081"
-
     environment:
-      ME_CONFIG_MONGODB_ADMINUSERNAME: admin
-      ME_CONFIG_MONGODB_ADMINPASSWORD: admin123
-      ME_CONFIG_MONGODB_URL: mongodb://admin:admin123@mongodb:27017/
-
-      ME_CONFIG_BASICAUTH_USERNAME: admin
-      ME_CONFIG_BASICAUTH_PASSWORD: pass
-
-
-      
-
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${ME_MONGO_USER}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${ME_MONGO_PASS}
+      ME_CONFIG_MONGODB_URL: "mongodb://${ME_MONGO_USER}:${ME_MONGO_PASS}@mongodb:27017/${MONGO_INITDB_DATABASE}?authSource=admin"
+      ME_CONFIG_BASICAUTH_USERNAME: ${ME_BASICAUTH_USER}
+      ME_CONFIG_BASICAUTH_PASSWORD: ${ME_BASICAUTH_PASS}
     depends_on:
       - mongodb
+    restart: unless-stopped
 
+  backend:
+    build: ./backend
+    container_name: bitvault-backend
+    env_file:
+      - .env
+    environment:
+      - MONGO_URL=mongodb://${ME_MONGO_USER}:${ME_MONGO_PASS}@mongodb:27017/${MONGO_INITDB_DATABASE}?authSource=admin
+      - PORT=4000
+    ports:
+      - "4000:4000"
+    depends_on:
+      - mongodb
     restart: unless-stopped
