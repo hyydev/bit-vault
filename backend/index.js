@@ -1,13 +1,27 @@
 const express = require("express");
+const mainRouter = require("./routes/index");
+const cors = require("cors");
 const { connectDB } = require("./db");
-require("dotenv").config();
 const app = express();
-app.use(express.json());
+require("dotenv").config();
 const PORT = process.env.PORT || 4000;
 connectDB().then(() => {
   app.get("/health", (req, res) => res.json({ ok: true }));
   app.listen(PORT, () => console.log(`Backend listening on ${PORT}`));
 });
+
+
+
+
+
+app.use(express.json());
+app .use(cors());
+app.use("/api/v1/", mainRouter);
+
+
+
+
+
 
 
 
