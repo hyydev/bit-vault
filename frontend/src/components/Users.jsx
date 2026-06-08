@@ -1,13 +1,20 @@
-import { useState } from "react"
+import { useState,useEffect } from "react"
 import { Button } from "./Button"
+
+import useNavigate from "react-router-dom"
+
 
 export const Users = () => {
     // Replace with backend call
-    const [users, setUsers] = useState([{
-        firstName: "Devesh",
-        lastName: "Sharma",
-        _id: 1
-    }]);
+    const [users, setUsers] = useState()
+
+    useEffect(()=>{
+        axios.get("http://localhost:3000/api/v1/users")
+        .then(response =>{
+            setUsers(response.data.user)
+        })
+
+    }, [])
 
     return <>
         <div className="font-bold mt-6 text-lg">
@@ -21,6 +28,8 @@ export const Users = () => {
         </div>
     </>
 }
+
+const navigate = useNavigate()
 
 function User({user}) {
     return <div className="flex justify-between">
@@ -38,7 +47,8 @@ function User({user}) {
         </div>
 
         <div className="flex flex-col justify-center h-ful">
-            <Button label={"Send Money"} />
+            <Button onClick={(e)=>navigate(`/send?id'`+user._id + '&name=' + user.firstName)} 
+            label={"Send Money"} />
         </div>
     </div>
 }
